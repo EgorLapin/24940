@@ -20,7 +20,8 @@ int main()
 
     fd_set read_fds, temp_fds;
 
-    if ((server_fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+    if ((server_fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
+    {
         perror("Socket creation failed");
         exit(EXIT_FAILURE);
     }
