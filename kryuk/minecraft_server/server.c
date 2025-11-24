@@ -57,7 +57,6 @@ int main(void) {
     
     FD_ZERO(&master_fds);
     FD_SET(server_fd, &master_fds);
-    max_fd = server_fd;
     
     for (i = 0; i < MAX_CLIENTS; i++) {
         clients[i].fd = -1;
@@ -69,11 +68,14 @@ int main(void) {
     while (1) {
         read_fds = master_fds;
         
-        struct timespec timeout;
+        struct timeval timeout;
         timeout.tv_sec = 0;
-        timeout.tv_nsec = 100000000;
+        timeout.tv_usec = 100000;
         
-        if (select(max_fd + 1, &read_fds, NULL, NULL, &timeout) == -1) {
+        if (select(server_fd + 1, &read_fds, NULL, NULL, &timeout) == -1) {
+            if (errno == EINTR) {
+                continue;
+            }
             perror("select");
             break;
         }
@@ -91,10 +93,6 @@ int main(void) {
                         clients[i].fd = new_client;
                         clients[i].active = 1;
                         clients[i].pending = 0;
-                        FD_SET(new_client, &master_fds);
-                        if (new_client > max_fd) {
-                            max_fd = new_client;
-                        }
                         
                         memset(&clients[i].aio, 0, sizeof(struct aiocb));
                         clients[i].aio.aio_fildes = new_client;
@@ -105,7 +103,6 @@ int main(void) {
                         if (aio_read(&clients[i].aio) == -1) {
                             perror("aio_read");
                             close(new_client);
-                            FD_CLR(new_client, &master_fds);
                             clients[i].fd = -1;
                             clients[i].active = 0;
                         } else {
@@ -136,7 +133,6 @@ int main(void) {
                         perror("aio_return");
                     }
                     close(clients[i].fd);
-                    FD_CLR(clients[i].fd, &master_fds);
                     clients[i].fd = -1;
                     clients[i].active = 0;
                 } else {
@@ -167,7 +163,6 @@ int main(void) {
                         if (errno != EINPROGRESS) {
                             perror("aio_read");
                             close(clients[i].fd);
-                            FD_CLR(clients[i].fd, &master_fds);
                             clients[i].fd = -1;
                             clients[i].active = 0;
                         } else {
