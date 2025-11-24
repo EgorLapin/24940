@@ -58,6 +58,8 @@ int main(void) {
     FD_ZERO(&master_fds);
     FD_SET(server_fd, &master_fds);
     
+    int had_clients = 0;
+    
     for (i = 0; i < MAX_CLIENTS; i++) {
         clients[i].fd = -1;
         clients[i].active = 0;
@@ -107,6 +109,7 @@ int main(void) {
                             clients[i].active = 0;
                         } else {
                             clients[i].pending = 1;
+                            had_clients = 1;
                         }
                         break;
                     }
@@ -176,13 +179,17 @@ int main(void) {
         }
         
         int active_clients = 0;
+        int pending_operations = 0;
         for (i = 0; i < MAX_CLIENTS; i++) {
             if (clients[i].fd != -1) {
                 active_clients++;
             }
+            if (clients[i].pending) {
+                pending_operations++;
+            }
         }
         
-        if (active_clients == 0) {
+        if (had_clients && active_clients == 0 && pending_operations == 0) {
             break;
         }
     }
