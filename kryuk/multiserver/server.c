@@ -51,6 +51,8 @@ int main(void) {
     FD_SET(server_fd, &master_fds);
     max_fd = server_fd;
     
+    int had_clients = 0;
+    
     for (i = 0; i < MAX_CLIENTS; i++) {
         client_fds[i] = -1;
     }
@@ -78,6 +80,7 @@ int main(void) {
                         if (new_client > max_fd) {
                             max_fd = new_client;
                         }
+                        had_clients = 1;
                         break;
                     }
                 }
@@ -126,7 +129,7 @@ int main(void) {
             }
         }
         
-        if (active_clients == 0) {
+        if (had_clients && active_clients == 0) {
             break;
         }
     }
