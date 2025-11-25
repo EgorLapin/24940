@@ -139,8 +139,7 @@ int main(void) {
                     clients[i].fd = -1;
                     clients[i].active = 0;
                 } else {
-                    clients[i].buffer[nbytes] = '\0';
-                    
+                    // Capture processing time (when server processes the message, not when it was sent)
                     time_t now;
                     struct tm *timeinfo;
                     char timestamp[64];
@@ -148,6 +147,8 @@ int main(void) {
                     time(&now);
                     timeinfo = localtime(&now);
                     strftime(timestamp, sizeof(timestamp), "[%Y-%m-%d %H:%M:%S] ", timeinfo);
+                    
+                    clients[i].buffer[nbytes] = '\0';
                     
                     for (int j = 0; j < nbytes; j++) {
                         clients[i].buffer[j] = toupper((unsigned char)clients[i].buffer[j]);
