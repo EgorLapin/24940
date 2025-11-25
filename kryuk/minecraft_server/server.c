@@ -139,14 +139,9 @@ int main(void) {
                     clients[i].fd = -1;
                     clients[i].active = 0;
                 } else {
-                    // Capture processing time (when server processes the message, not when it was sent)
-                    time_t now;
-                    struct tm *timeinfo;
-                    char timestamp[64];
-                    
-                    time(&now);
-                    timeinfo = localtime(&now);
-                    strftime(timestamp, sizeof(timestamp), "[%Y-%m-%d %H:%M:%S] ", timeinfo);
+                    // Capture time when message is received
+                    struct timespec start_time, end_time;
+                    clock_gettime(CLOCK_MONOTONIC, &start_time);
                     
                     clients[i].buffer[nbytes] = '\0';
                     
@@ -154,7 +149,14 @@ int main(void) {
                         clients[i].buffer[j] = toupper((unsigned char)clients[i].buffer[j]);
                     }
                     
-                    printf("%s%s", timestamp, clients[i].buffer);
+                    // Capture time when message is output
+                    clock_gettime(CLOCK_MONOTONIC, &end_time);
+                    
+                    // Calculate processing time in microseconds
+                    long processing_us = (end_time.tv_sec - start_time.tv_sec) * 1000000L +
+                                        (end_time.tv_nsec - start_time.tv_nsec) / 1000L;
+                    
+                    printf("[Processing time: %ld us] %s", processing_us, clients[i].buffer);
                     fflush(stdout);
                     
                     memset(&clients[i].aio, 0, sizeof(struct aiocb));
