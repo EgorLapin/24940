@@ -1,0 +1,12 @@
+CC = gcc
+CFLAGS = -Wall -Wextra -g
+TARGET = 1
+SOURCE = 1.c
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SOURCE)
+
+.PHONY: all clean
+

@@ -1,0 +1,11 @@
+CC = gcc
+CFLAGS = -Wall -Wextra -g
+TARGET = 5
+SOURCE = 5.c
+
+all: $(TARGET)
+
+$(TARGET): $(SOURCE)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SOURCE)
+
+.PHONY: all clean

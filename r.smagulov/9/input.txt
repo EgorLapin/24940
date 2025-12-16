@@ -1,0 +1,5 @@
+Hello, World!
+This is a test file for waitcat program.
+The cat command will display this content.
+And the parent process will wait until child finishes.
+Last line of the file.
